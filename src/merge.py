@@ -1,42 +1,49 @@
-# Time Complexity: O(n log n)
-# The building list is recursively divided in half, creating log(n) levels
-# of recursion. At each level, every building (or skyline point) is processed
-# once during the merge step, resulting in O(n) work per level.
-# Therefore, the overall time complexity is O(n log n).
+# Given two already-correct skylines (each covering a left/right half of
+# the building list), combines them into one skyline covering the whole
+# range, but instead of merging two sorted lists of values, we're merging 
+# two sorted lists of (height, x) strips and tracking the max height 
+# contributed by each side at every x-coordinate where either skyline changes.
 
-def find_skyline(buildings):
+from typing import List, Tuple
 
-    # This will recursively find the syline produced by a list of buildings
+Strip = Tuple[int, int]  # (h, x)
 
-    # Base case
 
-    if not buildings:
-        return []
+def merge_skylines(left: List[Strip], right: List[Strip]) -> List[Strip]:
 
-    # Base case number 2
+    i = j = 0
+    left_h = right_h = 0
+    merged: List[Strip] = []
 
-    if len(buildings) == 1:
-        height, left_x, right_x = buildings[0]
+    while i < len(left) and j < len(right):
+        lh, lx = left[i]
+        rh, rx = right[j]
 
-        return [
-            (height, left_x),
-            (0, right_x)
-        ]
-    
-     # Find the middle index of the building list.
+        if lx < rx:
+            # Left skyline changes first; only its height updates.
+            x = lx
+            left_h = lh
+            i += 1
+        elif rx < lx:
+            # Right skyline changes first; only its height updates.
+            x = rx
+            right_h = rh
+            j += 1
+        else:
+            # Both skylines change at the same x — advance both pointers.
+            x = lx
+            left_h = lh
+            right_h = rh
+            i += 1
+            j += 1
 
-    midpoint = len(buildings) // 2
+        h = max(left_h, right_h)
 
-    # Divide the buildings into two smaller groups.
+        # Only emit a new strip if the combined height actually changed;
 
-    left_buildings = buildings[:midpoint]
-    right_buildings = buildings[midpoint:]
+        if not merged or merged[-1][0] != h:
+            merged.append((h, x))
 
-    # Recursively find the skyline of each half.
-
-    left_skyline = find_skyline(left_buildings)
-    right_skyline = find_skyline(right_buildings)
-
-    # Combine both completed skylines.
-
-    return merge_skylines(left_skyline, right_skyline)
+    merged.extend(left[i:])
+    merged.extend(right[j:])
+    return merged
