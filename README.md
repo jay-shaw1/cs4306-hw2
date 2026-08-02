@@ -62,3 +62,11 @@ generated building sets:
 ```
 python3 tests/brute_force.py
 ```
+
+## Test cases (`InputsOutputs/`)
+
+1. Disjoint buildings with gaps between them
+2. The assignment's own worked example
+3. A single building
+4. A fully nested building (shorter building hidden inside a taller one)
+5. Adjacent buildings of equal height sharing an edge
